@@ -10,10 +10,9 @@ import java.util.ArrayList;
 @Data
 public class User {
     @Id
-    Long id;
+    String id;
 
     String username;
     String password;
-
     ArrayList<Case> cases;
 }
