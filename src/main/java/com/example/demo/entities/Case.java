@@ -13,4 +13,8 @@ public class Case {
     }
 
     public Case() {}
+
+    public void changeStatus() {
+        this.isReady = !this.isReady;
+    }
 }

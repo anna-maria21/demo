@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,20 +33,32 @@ public class TestController {
 
     // додавання елементу в список
     @PutMapping("/{id}/add-cases/{caseValue}")
-    User addCaseToList(HttpSession httpSession, @PathVariable String caseValue, @PathVariable String id) {
+    ArrayList<Case> addCaseToList(HttpSession httpSession, @PathVariable String caseValue, @PathVariable String id) {
 //        User curUser = userRepository.findUserById(httpSession.getAttribute("userId").toString());
         User curUser = userRepository.findUserById(id);
         List<Case> curUserCases = curUser.getCases();
         curUserCases.add(new Case(caseValue, false));
-        return curUser;
+        return curUser.getCases();
     }
 
     // видалення всіх елементів
     @DeleteMapping("/{id}/remove-cases")
-    User removeAllCases(@PathVariable String id) {
+    ArrayList<Case> removeAllCases(@PathVariable String id) {
         User curUser = userRepository.findUserById(id);
         curUser.getCases().clear();
-        return curUser;
+        return curUser.getCases();
+    }
+
+    @PostMapping("/{id}/all-cases/{item}")
+    ArrayList<Case> changeCaseStatus(@PathVariable String id, @PathVariable String item) {
+        User curUser = userRepository.findUserById(id);
+        ArrayList<Case> curUserCases = curUser.getCases();
+        curUserCases.forEach(i -> {
+            if (i.getItem().equals(item)) {
+                i.changeStatus();
+            }
+        });
+        return curUserCases;
     }
 
 }
