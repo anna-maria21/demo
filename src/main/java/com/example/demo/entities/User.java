@@ -14,5 +14,4 @@ public class User {
 
     String username;
     String password;
-    ArrayList<Case> cases;
 }

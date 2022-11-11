@@ -1,63 +1,66 @@
 package com.example.demo.controllers;
 
 import com.example.demo.entities.Case;
-import com.example.demo.entities.User;
+import com.example.demo.entities.CaseList;
 import com.example.demo.repositories.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.demo.repositories.CaseListRepository;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/todolist")
 public class TestController {
 
-    @Autowired
-    UserRepository userRepository;
+    final UserRepository userRepository;
+    final CaseListRepository caseListRepository;
 
-    @GetMapping("/{id}")
-    String greeting(@PathVariable String id, HttpSession httpSession) {
+    private String id = "636a62a02f1175e04cec65d1";
+
+    public TestController(CaseListRepository caseListRepository, UserRepository userRepository) {
+        this.caseListRepository = caseListRepository;
+        this.userRepository = userRepository;
+    }
+
+    @GetMapping("{id}")
+    String greeting(HttpSession httpSession, @PathVariable String id) {
         httpSession.setAttribute("userId", id);
+//        System.out.println(caseListRepository.findCaseListById("636e2420a131361ef1841de4"));
         return "Hell World!!!!!!!!";
     }
 
     // виведення всіх елементів
-    @GetMapping("/{id}/all-cases")
-    User getAllCasesByUserId(HttpSession httpSession, @PathVariable String id) {
+    @GetMapping("/all-cases")
+    CaseList getAllCasesByUserId() {
 //        String id = httpSession.getAttribute("userId").toString();
-        return userRepository.findUserById(id);
+        return caseListRepository.findCaseListByUserId(id);
     }
 
 
     // додавання елементу в список
-    @PutMapping("/{id}/add-cases/{caseValue}")
-    ArrayList<Case> addCaseToList(HttpSession httpSession, @PathVariable String caseValue, @PathVariable String id) {
+    @PutMapping("/add-cases/{caseValue}")
+    ArrayList<Case> addCaseToList(HttpSession httpSession, @PathVariable String caseValue) {
 //        User curUser = userRepository.findUserById(httpSession.getAttribute("userId").toString());
-        User curUser = userRepository.findUserById(id);
-        List<Case> curUserCases = curUser.getCases();
-        curUserCases.add(new Case(caseValue, false));
-        return curUser.getCases();
+        CaseList curUserCaseList = caseListRepository.findCaseListByUserId(id);
+        curUserCaseList.getCaseList().add(new Case(caseValue, false));
+        return curUserCaseList.getCaseList();
     }
 
     // видалення всіх елементів
-    @DeleteMapping("/{id}/remove-cases")
-    ArrayList<Case> removeAllCases(@PathVariable String id) {
-        User curUser = userRepository.findUserById(id);
-        curUser.getCases().clear();
-        return curUser.getCases();
+    @DeleteMapping("/remove-cases")
+    ArrayList<Case> removeAllCases() {
+        CaseList curUserCaseList = caseListRepository.findCaseListByUserId(id);
+        curUserCaseList.getCaseList().clear();
+        return curUserCaseList.getCaseList();
     }
 
-    @PostMapping("/{id}/all-cases/{item}")
-    ArrayList<Case> changeCaseStatus(@PathVariable String id, @PathVariable String item) {
-        User curUser = userRepository.findUserById(id);
-        ArrayList<Case> curUserCases = curUser.getCases();
-        curUserCases.forEach(i -> {
-            if (i.getItem().equals(item)) {
-                i.changeStatus();
-            }
-        });
+    // зміна статусу
+    @PostMapping("/all-cases/{item}")
+    ArrayList<Case> changeCaseStatus(@PathVariable String item) {
+        CaseList curUserCaseList = caseListRepository.findCaseListByUserId(id);
+        ArrayList<Case> curUserCases = curUserCaseList.getCaseList();
+        curUserCases.stream().filter(i -> i.getItem().equals(item)).forEach(Case::changeStatus);
         return curUserCases;
     }
 
